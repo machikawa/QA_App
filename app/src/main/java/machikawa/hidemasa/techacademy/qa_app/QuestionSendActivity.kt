@@ -39,10 +39,11 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_question_send)
 
-        // インテントから取得。instance は生成せずとも良い？
+        // MainActivityのインテントからジャンルを取得。
         val extras = intent.extras
         mGenre = extras.getInt("genre")
 
+        // 当該画面におけるタイトルとリスナーの設定
         title = "質問作成"
         sendButton.setOnClickListener(this)
         imageView.setOnClickListener(this)
@@ -50,7 +51,7 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
 
     // ImageView と Button 押下時に処理するのは何か
     override fun onClick(v: View?) {
-        // イメージビューをくりっくしたとき
+        // イメージビューをくりっくしたとき. 外部ストレージへの権限確認と Show chooser
         if (v == imageView) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -62,35 +63,39 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
                 }
                 showChooser()
             }
-            // ボタンを押下したとき
+
+            // 投稿ボタンをクリックした場合の処理
         } else if (v == sendButton) {
+            // いつものキーボード引っ込め
             val im = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             im.hideSoftInputFromWindow(v!!.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS)
 
+            // Genre は root-> 子の回想 -> 孫の回想 と指定する。
             val databaseReference = FirebaseDatabase.getInstance().reference
             val genreRef = databaseReference.child(ContentsPATH).child(mGenre.toString())
 
+            // ぼちぼち firebas　に入れる準備するで〜。
             val data = HashMap<String, String>()
 
             // 現在のUserのUIDを指定
             data["uid"] =  FirebaseAuth.getInstance().currentUser!!.uid
 
+            // タイトルと本文は画面からゲット
             val title = titleText.text.toString()
             val body = bodyText.text.toString()
 
-            // タイトルがからの時
+            // 入力チェック1) タイトルがからの時
             if (title.isEmpty()) {
                 Snackbar.make(v!!,"タイトルを入力してください",Snackbar.LENGTH_LONG).show()
                 return
             }
-
-            // 質問がからの時
+            // 入力チェック2) 質問がからの時
             if (body.isEmpty()) {
                 Snackbar.make(v!!,"質問を入力してください",Snackbar.LENGTH_LONG).show()
                 return
             }
 
-            // Preference から名前を取得
+            // Shared Preference から名前を取得
             val sp = PreferenceManager.getDefaultSharedPreferences(this)
             val name = sp.getString(NameKEY,"")
 
@@ -98,6 +103,7 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
             data["body"] = body
             data["name"] = name
 
+            // Firebase に保存するために Base 64にエンコする。
             var drawable = imageView.drawable as? BitmapDrawable
 
             if (drawable != null) {
@@ -108,6 +114,8 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
 
                 data["image"] = bitmapString
             }
+            // Firebase への保存と、プログレスバーのはめ込み。
+            // ??? try catch とかはいらないのかな？ OnComplete でその辺をハンドルしているようにも見える。
             genreRef.push().setValue(data, this)
             progressBar.visibility = View.VISIBLE
          }
@@ -118,7 +126,7 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
         when (requestCode) {
             PERMISSIONS_REQUEST_CODE -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // ユーザーが許可したとき
+                    // ユーザーが許可したばあいは　showChooser へ
                     showChooser()
                 }
                 return
@@ -126,6 +134,7 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
         }
     }
 
+    // ???? 全体的にちょっと謎
     private fun showChooser() {
         // ギャラリーから選択するIntent
         val galleryIntent = Intent(Intent.ACTION_GET_CONTENT)
@@ -148,7 +157,6 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
 
         // EXTRA_INITIAL_INTENTS にカメラ撮影のIntentを追加
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(cameraIntent))
-
         startActivityForResult(chooserIntent, CHOOSER_REQUEST_CODE)
     }
 
