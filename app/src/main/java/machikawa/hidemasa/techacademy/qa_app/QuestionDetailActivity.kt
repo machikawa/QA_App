@@ -50,7 +50,7 @@ class QuestionDetailActivity : AppCompatActivity() {
         setContentView(R.layout.activity_question_detail)
 
         val extras = intent.extras
-        mQuestion = extras.get("Question") as Question
+        mQuestion = extras.get("question") as Question
 
         title = mQuestion.title
 

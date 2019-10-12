@@ -23,6 +23,9 @@ import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_question_send.*
 import java.io.ByteArrayOutputStream
 import android.Manifest
+import android.app.Activity
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 
 class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, DatabaseReference.CompletionListener {
 
@@ -160,6 +163,48 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
         startActivityForResult(chooserIntent, CHOOSER_REQUEST_CODE)
     }
 
+    // Intent のカメラとかの連携から戻ってきたときにImageViewへ
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == CHOOSER_REQUEST_CODE) {
+
+            if (resultCode != Activity.RESULT_OK) {
+                if (mPictureUri != null) {
+                    contentResolver.delete(mPictureUri!!, null, null)
+                    mPictureUri = null
+                }
+                return
+            }
+
+            // 画像を取得
+            val uri = if (data == null || data.data == null) mPictureUri else data.data
+
+            // URIからBitmapを取得する
+            val image: Bitmap
+            try {
+                val contentResolver = contentResolver
+                val inputStream = contentResolver.openInputStream(uri!!)
+                image = BitmapFactory.decodeStream(inputStream)
+                inputStream!!.close()
+            } catch (e: Exception) {
+                return
+            }
+
+            // 取得したBimapの長辺を500ピクセルにリサイズする
+            val imageWidth = image.width
+            val imageHeight = image.height
+            val scale = Math.min(500.toFloat() / imageWidth, 500.toFloat() / imageHeight) // (1)
+
+            val matrix = Matrix()
+            matrix.postScale(scale, scale)
+
+            val resizedImage = Bitmap.createBitmap(image, 0, 0, imageWidth, imageHeight, matrix, true)
+
+            // BitmapをImageViewに設定する
+            imageView.setImageBitmap(resizedImage)
+
+            mPictureUri = null
+        }
+    }
 
     override fun onComplete(databaseError: DatabaseError?, databaseReference: DatabaseReference) {
         progressBar.visibility = View.GONE

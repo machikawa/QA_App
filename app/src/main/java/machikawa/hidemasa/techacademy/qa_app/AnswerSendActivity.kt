@@ -22,7 +22,7 @@ class AnswerSendActivity : AppCompatActivity(), View.OnClickListener, DatabaseRe
         setContentView(R.layout.activity_answer_send)
 
         val extras = intent.extras
-        mQuestion = extras.get("Question") as Question
+        mQuestion = extras.get("question") as Question
 
         // UIの準備
         sendButton.setOnClickListener(this)
