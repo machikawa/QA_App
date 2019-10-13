@@ -3,9 +3,11 @@ package machikawa.hidemasa.techacademy.qa_app
 import android.content.Intent
 import android.os.Bundle
 import android.util.Base64
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
@@ -15,9 +17,10 @@ import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import android.widget.ListView
+import com.google.android.material.internal.NavigationMenu
 import com.google.firebase.database.*
+import kotlinx.android.synthetic.main.activity_question_detail.*
 import kotlinx.android.synthetic.main.content_main.*
-
 
 class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelectedListener {
 
@@ -31,10 +34,9 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
 
     private var mGenreRef: DatabaseReference? = null
 
-    // big なリスナー、ChildChangeEventとは。。おそらくreference からみた時全てが　Childだと思うので、
-    // 本来Childがあるもの全てにはリスナーをつけなさいということだと思われる。
+    //
     private val mEventListener = object : ChildEventListener {
-
+        // 質問を追加したりするときに起動する模様
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
             val map = dataSnapshot.value as Map<String, String>
             val title = map["title"] ?: ""
@@ -69,7 +71,7 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
             mAdapter.notifyDataSetChanged() // ???これが別でも出たが少々謎。
         }
 
-        // ??? これのChildとはなんぞ。
+        // 回答を追加するときに起動する模様
         override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {
             val map = dataSnapshot.value as Map<String, String>
 
@@ -89,7 +91,6 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
                             question.answers.add(answer)
                         }
                     }
-
                     mAdapter.notifyDataSetChanged()
                 }
             }
@@ -124,7 +125,6 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
 
             // 現在のログイン済みユーザーの名称を取得できるかな
             val user = FirebaseAuth.getInstance().currentUser
-            // ??? アプリケーションコンテキストってなんだ。
             // できなければNotYetログインだから別画面へ
             if (user == null) {
                 val intent = Intent(applicationContext, LoginActivity::class.java)
@@ -167,10 +167,21 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
     override fun onResume() {
         super.onResume()
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
+        val navigationMenu = navigationView.menu.findItem(R.id.nav_favorite)
 
         // 1:趣味を既定の選択とする
         if(mGenre == 0) {
             onNavigationItemSelected(navigationView.menu.getItem(0))
+        }
+
+        // ログイン時のみオキニメニューを表示
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            Log.d("machid", "userNONNULL")
+            navigationMenu.setVisible(true)
+        } else {
+            Log.d("machid", "userNULL")
+            navigationMenu.setVisible(false)
         }
     }
 
@@ -190,7 +201,6 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
             startActivity(intent)
             return true
         }
-
         return super.onOptionsItemSelected(item)
     }
 
@@ -214,6 +224,8 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
         } else if (id == R.id.nav_protein) {
             mToolbar.title = "筋トレ"
             mGenre = 5
+        } else if (id == R.id.nav_favorite){
+            /// おきに画面への繊維処理
         }
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
@@ -230,9 +242,6 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
         }
         mGenreRef = mDatabaseReference.child(ContentsPATH).child(mGenre.toString())
         mGenreRef!!.addChildEventListener(mEventListener)
-
         return true
     }
-
-
 }

@@ -29,7 +29,7 @@ import android.graphics.Matrix
 
 class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, DatabaseReference.CompletionListener {
 
-    // のっけから何かね。
+    // 定数的なやつ。
     companion object {
         private val PERMISSIONS_REQUEST_CODE = 100
         private val CHOOSER_REQUEST_CODE = 100
@@ -118,7 +118,7 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
                 data["image"] = bitmapString
             }
             // Firebase への保存と、プログレスバーのはめ込み。
-            // ??? try catch とかはいらないのかな？ OnComplete でその辺をハンドルしているようにも見える。
+            // push はランダム数字をぶち込んで、その下に data をぶち込むというような仕組みのようだ。
             genreRef.push().setValue(data, this)
             progressBar.visibility = View.VISIBLE
          }
@@ -174,10 +174,8 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
                 }
                 return
             }
-
             // 画像を取得
             val uri = if (data == null || data.data == null) mPictureUri else data.data
-
             // URIからBitmapを取得する
             val image: Bitmap
             try {
@@ -193,19 +191,17 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
             val imageWidth = image.width
             val imageHeight = image.height
             val scale = Math.min(500.toFloat() / imageWidth, 500.toFloat() / imageHeight) // (1)
-
             val matrix = Matrix()
             matrix.postScale(scale, scale)
-
             val resizedImage = Bitmap.createBitmap(image, 0, 0, imageWidth, imageHeight, matrix, true)
 
             // BitmapをImageViewに設定する
             imageView.setImageBitmap(resizedImage)
-
             mPictureUri = null
         }
     }
 
+    // FB への保存が完了したときにこいつが起動する。今回だと当該のActivity を終了するということらしい。（フィニッシュ）
     override fun onComplete(databaseError: DatabaseError?, databaseReference: DatabaseReference) {
         progressBar.visibility = View.GONE
 

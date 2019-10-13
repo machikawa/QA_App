@@ -16,6 +16,19 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true" />
 
+    <Button
+        android:id="@+id/favoriteBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="25dp"
+        android:background="@drawable/maruform"
+        android:textColor="#DCDCDC"
+        android:textSize="30dp"
+        android:text="★"
+        />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

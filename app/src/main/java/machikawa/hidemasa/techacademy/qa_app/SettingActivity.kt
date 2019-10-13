@@ -42,7 +42,7 @@ class SettingActivity : AppCompatActivity() {
 
             // ログインしてなきゃ帰る
             if (user == null) {
-                Snackbar.make(v,"",Snackbar.LENGTH_LONG).show()
+                Snackbar.make(v,"ログインしていません ",Snackbar.LENGTH_LONG).show()
                 // ログインしてれば各種情報変更
             } else {
                 // 表示名変更をFBに！
@@ -57,7 +57,6 @@ class SettingActivity : AppCompatActivity() {
                 val editor = sp.edit()
                 editor.putString(NameKEY, name)
                 editor.commit()
-
                 Snackbar.make(v,"表示名を変更しました",Snackbar.LENGTH_LONG).show()
             }
         }
@@ -70,4 +69,20 @@ class SettingActivity : AppCompatActivity() {
         }
 
     }
+
+    override fun onResume() {
+        super.onResume()
+
+        // ログイン済みのユーザーを取得し
+        val user = FirebaseAuth.getInstance().currentUser
+        val displayName = findViewById(R.id.nameText) as EditText
+
+        // ログインしていない時は表示名を消す
+        if (user != null){
+        } else if (user == null){
+            displayName.setText("")
+        }
+
+    }
+
 }

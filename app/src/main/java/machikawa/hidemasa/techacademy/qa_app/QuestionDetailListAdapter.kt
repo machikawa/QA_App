@@ -3,6 +3,7 @@ package machikawa.hidemasa.techacademy.qa_app
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +16,6 @@ class QuestionDetailListAdapter(
     private val mQustion: Question
     ) : BaseAdapter() {
 
-    // ??? この書き方、謎。
     companion object {
         private val TYPE_QUESTION = 0
         private val TYPE_ANSWER = 1
@@ -23,11 +23,13 @@ class QuestionDetailListAdapter(
 
     private var mLayoutInfrater : LayoutInflater? = null
 
+    // レイアウトインフレーターはプログラムでレイアウトのデータ使うための人。
     init {
-        // ??レイアウトインフレーターをもうちょいチェック
         mLayoutInfrater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as  LayoutInflater
     }
 
+    // 質問一覧の画面のリストビューでアイテムをタップしたときに起動する模様。
+    // 回答を投稿したあとにも動作しているようだ。
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         var convertView = convertView
 
@@ -37,7 +39,6 @@ class QuestionDetailListAdapter(
             }
             val body = mQustion.body
             val name = mQustion.name
-
 
             val bodyTextView = convertView.findViewById<View>(R.id.bodyTextView) as TextView
             bodyTextView.text = body
@@ -69,18 +70,23 @@ class QuestionDetailListAdapter(
         return convertView
     }
 
+    // うまくコールされていいない気がする
     override fun getItem(position: Int): Any {
+        Log.d("machid","QuestionDetailListAdapter-GETTTEM")
         return mQustion
     }
 
+    // タップしたポジション？な気がする。詳細行をタップするたびにコールされている。
     override fun getItemId(position: Int): Long {
         return 0
     }
 
+    // 純粋にリストビューの行を表示しているように見える。
     override fun getCount(): Int {
         return 1 + mQustion.answers.size
     }
 
+    // おそらくリストビューのレコードの分だけ出ている希ガス。
     override fun getItemViewType(position: Int): Int {
         return if (position == 0) {
             TYPE_QUESTION
@@ -88,6 +94,4 @@ class QuestionDetailListAdapter(
             TYPE_ANSWER
         }
     }
-
-
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
@@ -11,7 +12,7 @@ import android.widget.ImageView
 import android.widget.TextView
 
 class QuestionsListAdapter(context: Context):BaseAdapter() {
-    // そういえば Layout Infrator ってなんだっけ？
+
     private var mLayoutInflater: LayoutInflater
     private var mQuestionArrayList = ArrayList<Question>()
     init {
@@ -19,12 +20,15 @@ class QuestionsListAdapter(context: Context):BaseAdapter() {
     }
 
     // 実装必須なメソッドたち
+    // なぜかコールされていない。
     override fun getItem(position: Int): Any {
         return mQuestionArrayList[position]
     }
+    // 質問一覧リストビューのタップしたアイテムのポジションを返すっぽい。
     override fun getItemId(position: Int): Long {
         return position.toLong()
     }
+    // 質問一覧画面を表示したときに１行あたり２回なぜかコールされており、最終行だけはなぜか１回。
     override fun getCount(): Int {
         return mQuestionArrayList.size
     }
@@ -56,7 +60,7 @@ class QuestionsListAdapter(context: Context):BaseAdapter() {
         return convertView
     }
 
-    // 質問一覧のあれーりすと
+    // 質問一覧のあれーりすと.　このメソッドではコールしていなくてMain アクティビティで使っている。
     fun setQuestionArrayList(questionArrayList: ArrayList<Question>) {
         mQuestionArrayList = questionArrayList
     }

@@ -19,6 +19,8 @@
         <item
             android:id="@+id/nav_protein"
             android:title="筋トレ"/>
-
+        <item
+            android:id="@+id/nav_favorite"
+            android:title="お気に入り質問"/>
     </group>
 </menu>

@@ -130,8 +130,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
     }///// Oncreate 終わり
-
-
+    
     private fun createAccount(email: String, password: String) {
         // プログレスバーを表示する
         progressBar.visibility = View.VISIBLE

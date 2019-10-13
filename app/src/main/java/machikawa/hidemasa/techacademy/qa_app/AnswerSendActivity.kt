@@ -48,7 +48,6 @@ class AnswerSendActivity : AppCompatActivity(), View.OnClickListener, DatabaseRe
 
         val data = HashMap<String, String>()
 
-
         // UID
         data["uid"] = FirebaseAuth.getInstance().currentUser!!.uid
 
