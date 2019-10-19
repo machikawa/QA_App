@@ -137,7 +137,7 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
         }
     }
 
-    // ???? 全体的にちょっと謎
+
     private fun showChooser() {
         // ギャラリーから選択するIntent
         val galleryIntent = Intent(Intent.ACTION_GET_CONTENT)

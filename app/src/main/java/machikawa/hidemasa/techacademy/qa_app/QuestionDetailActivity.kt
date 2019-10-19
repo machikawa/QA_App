@@ -14,8 +14,11 @@ import kotlinx.android.synthetic.main.activity_question_detail.*
 
 class QuestionDetailActivity : AppCompatActivity() {
 
+    ////// 課題関連 START
     // お気に入りにしているかどうか
     var isFavorite:Boolean = false
+    private lateinit var mfavRef:DatabaseReference
+    ////// 課題関連 END
 
     private lateinit var mQuestion: Question
     private lateinit var mAdapter: QuestionDetailListAdapter
@@ -49,6 +52,7 @@ class QuestionDetailActivity : AppCompatActivity() {
         }
     }
 
+    ////// 課題関連 START
     // おきに追加のイベントリスナー
     private val mFavoriteEventListener = object : ChildEventListener {
         override fun onCancelled(p0: DatabaseError) {
@@ -57,24 +61,24 @@ class QuestionDetailActivity : AppCompatActivity() {
         }
         override fun onChildChanged(p0: DataSnapshot, p1: String?) {
         }
-        // お気に入りの追加が押されたなら
+        // お気に入りの追加が押さたときの処理として
         override fun onChildAdded(p0: DataSnapshot, p1: String?) {
-            isFavorite = true
-//            favoriteBtn.text = "お気に入り済み"
-            favoriteBtn.setTextColor(Color.parseColor("#FFD700"))
+            // 画面ロード時に当該ユーザーのお気に入りQuesitonID一覧が読み込まれるため、現在のQuestionUIDのものがあるか判断する
+            val favQuestionUid = p0.key
+            if (favQuestionUid == mQuestion.questionUid) {
+                favoriteBtn.setTextColor(Color.parseColor("#FFD700"))
+                isFavorite = true
+            }
         }
-        // お気に入りがもう一度押されたなら
+        // Remove 時の処理は EventListern にて実施する。
         override fun onChildRemoved(p0: DataSnapshot) {
-            isFavorite = false
-            favoriteBtn.setTextColor(Color.parseColor("#DCDCDC"))
-//            favoriteBtn.text = "ブクマしてくれ"
         }
     }
+    ////// 課題関連 END
 
-        override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_question_detail)
-
         val extras = intent.extras
         mQuestion = extras.get("question") as Question
 
@@ -84,10 +88,10 @@ class QuestionDetailActivity : AppCompatActivity() {
         listView.adapter = mAdapter
         mAdapter.notifyDataSetChanged()
 
-        fab.setOnClickListener {
-            // ログイン済みのユーザーを取得する
-            val user = FirebaseAuth.getInstance().currentUser
+        // ログイン済みのユーザーを取得する
+        val user = FirebaseAuth.getInstance().currentUser
 
+        fab.setOnClickListener {
             if (user == null) {
                 // ログインしていなければログイン画面に遷移させる
                 val intent = Intent(applicationContext, LoginActivity::class.java)
@@ -99,36 +103,54 @@ class QuestionDetailActivity : AppCompatActivity() {
                 startActivity(intent)
             }
         }
+
         val dataBaseReference = FirebaseDatabase.getInstance().reference
         mAnswerRef = dataBaseReference.child(ContentsPATH).child(mQuestion.genre.toString()).child(mQuestion.questionUid).child(AnswersPATH)
         mAnswerRef.addChildEventListener(mEventListener)
-    }
 
-    // お気に入りボタンの表示判定。ログインして帰ってきたときなどのために OnResume に定義している。
-    override fun onResume() {
-        super.onResume()
-
-        val loginuser = FirebaseAuth.getInstance().currentUser
-        if (loginuser != null) {
+        ////// 課題関連 STRAT
+        // お気に入り機能の表示有無　ログイン時のみ表示する
+        if (user != null) {
             favoriteBtn.visibility = View.VISIBLE
         } else {
             favoriteBtn.visibility = View.INVISIBLE
         }
-        //ボタンタップでオキニ削除or登録
-        favoriteBtn.setOnClickListener{
-            val dbref = FirebaseDatabase.getInstance().reference.child(favoritesMgmtPath).child(loginuser!!.uid.toString()).child(mQuestion.questionUid)
-            dbref.addChildEventListener(mFavoriteEventListener)
-            val mapper = HashMap<String, String>()
-            mapper["genre"] = mQuestion.genre.toString()
-            if (isFavorite) {
-                dbref.removeValue()
-                Snackbar.make(findViewById(android.R.id.content),"お気に入りから削除されました",Snackbar.LENGTH_SHORT).show()
-            } else {
-                dbref.setValue(mapper)
-                Snackbar.make(findViewById(android.R.id.content),"お気に入りに追加されました",Snackbar.LENGTH_SHORT).show()
+
+        // こちらも全てログイン時のみに行われる処理。うまく分離するなりマージしなくてはいけないが。。
+        if (user != null) {
+
+            //////// この辺りから　Favorite 関連を処理しているつもり
+            val favDBRef= FirebaseDatabase.getInstance().reference
+            mfavRef = favDBRef.child(favoritesMgmtPath).child(user!!.uid.toString())
+            mfavRef.addChildEventListener(mFavoriteEventListener)
+
+            //ボタンタップでオキニ削除or登録.
+            favoriteBtn.setOnClickListener {
+                val dbref = FirebaseDatabase.getInstance().reference.child(favoritesMgmtPath)
+                    .child(user!!.uid.toString()).child(mQuestion.questionUid)
+                val mapper = HashMap<String, String>()
+                mapper["genre"] = mQuestion.genre.toString()
+                if (isFavorite) {
+                    dbref.removeValue()
+                    isFavorite = false
+                    favoriteBtn.setTextColor(Color.parseColor("#DCDCDC"))
+                    Snackbar.make(
+                        findViewById(android.R.id.content),
+                        "お気に入りから削除されました",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                } else {
+                    dbref.setValue(mapper)
+                    isFavorite = true
+                    favoriteBtn.setTextColor(Color.parseColor("#FFD700"))
+                    Snackbar.make(
+                        findViewById(android.R.id.content),
+                        "お気に入りに追加されました",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                }
             }
-//// 【オフにし忘れるな！！！】データ完全削除用 オキニボタンの押下でデータ全削除
-/////            dbref.setValue(mapper)
         }
+        ////// 課題関連 END
     }
 }

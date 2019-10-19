@@ -51,7 +51,6 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
                     // なんか適当なByteArray返す。https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/byte-array-of.html
                     byteArrayOf()
                 }
-
             // 回答のハッシュマップ。質問1つに対し諸々つくからこうなるのだと思う。
             val answerArrayList = ArrayList<Answer>()
             val answerMap = map["answers"] as Map<String, String>?
@@ -122,7 +121,6 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
                 Snackbar.make(view, "ジャンルを選択して下さい", Snackbar.LENGTH_LONG).show()
             } else {
             }
-
             // 現在のログイン済みユーザーの名称を取得できるかな
             val user = FirebaseAuth.getInstance().currentUser
             // できなければNotYetログインだから別画面へ
@@ -146,7 +144,6 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
         // R.id.Nav_view は Activity Main.xml に定義したナビゲーションビューですので、これをタッチしたときににゃんにゃんする用。
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this)
-        // ???このあたりはタップした時用の処理とは思うが今ひとつ理由もわからず。ナビゲーションビューとドロワーの違いは明らかにせねば。。
         // Firebase のインスタンスを生成
         mDatabaseReference = FirebaseDatabase.getInstance().reference
 
@@ -163,7 +160,6 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
         }
     }
 
-    /// ? これっていつコールされるのだろう。
     override fun onResume() {
         super.onResume()
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
@@ -177,10 +173,8 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
         // ログイン時のみオキニメニューを表示
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
-            Log.d("machid", "userNONNULL")
             navigationMenu.setVisible(true)
         } else {
-            Log.d("machid", "userNULL")
             navigationMenu.setVisible(false)
         }
     }
@@ -225,7 +219,8 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
             mToolbar.title = "筋トレ"
             mGenre = 5
         } else if (id == R.id.nav_favorite){
-            /// おきに画面への繊維処理
+            val intent = Intent(applicationContext, favActiviy::class.java)
+            startActivity(intent)
         }
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
@@ -235,7 +230,6 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
         mQuestionArrayList.clear()
         mAdapter.setQuestionArrayList(mQuestionArrayList)
         mListView.adapter = mAdapter
-
         // 選択したジャンルにリスナーを登録する
         if (mGenreRef != null) {
             mGenreRef!!.removeEventListener(mEventListener)

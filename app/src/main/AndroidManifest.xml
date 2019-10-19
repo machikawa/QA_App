@@ -12,7 +12,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".AnswerSendActivity"></activity>
+        <activity android:name=".favActiviy"></activity>
+        <activity
+            android:name=".FavoriteActivity"
+            android:label="@string/title_activity_favorite"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".AnswerSendActivity" />
         <activity android:name=".QuestionDetailActivity" />
         <activity android:name=".QuestionSendActivity" />
         <activity android:name=".SettingActivity" />

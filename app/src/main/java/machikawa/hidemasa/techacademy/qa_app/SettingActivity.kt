@@ -67,7 +67,6 @@ class SettingActivity : AppCompatActivity() {
             nameText.setText("")
             Snackbar.make(v, "ログアウトしました",Snackbar.LENGTH_LONG).show()
         }
-
     }
 
     override fun onResume() {
