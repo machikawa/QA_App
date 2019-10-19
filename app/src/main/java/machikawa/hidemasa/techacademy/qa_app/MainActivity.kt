@@ -34,7 +34,6 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
 
     private var mGenreRef: DatabaseReference? = null
 
-    //
     private val mEventListener = object : ChildEventListener {
         // 質問を追加したりするときに起動する模様
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {

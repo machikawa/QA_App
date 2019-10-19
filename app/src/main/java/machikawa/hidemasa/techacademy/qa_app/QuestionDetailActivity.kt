@@ -18,6 +18,8 @@ class QuestionDetailActivity : AppCompatActivity() {
     // お気に入りにしているかどうか
     var isFavorite:Boolean = false
     private lateinit var mfavRef:DatabaseReference
+    val favoritedBtnColor:String = "#FFD700"
+    val notFavoritedBtnColor:String = "#DCDCDC"
     ////// 課題関連 END
 
     private lateinit var mQuestion: Question
@@ -66,8 +68,7 @@ class QuestionDetailActivity : AppCompatActivity() {
             // 画面ロード時に当該ユーザーのお気に入りQuesitonID一覧が読み込まれるため、現在のQuestionUIDのものがあるか判断する
             val favQuestionUid = p0.key
             if (favQuestionUid == mQuestion.questionUid) {
-                favoriteBtn.setTextColor(Color.parseColor("#FFD700"))
-                isFavorite = true
+                favoriteAction()
             }
         }
         // Remove 時の処理は EventListern にて実施する。
@@ -109,40 +110,32 @@ class QuestionDetailActivity : AppCompatActivity() {
         mAnswerRef.addChildEventListener(mEventListener)
 
         ////// 課題関連 STRAT
-        // お気に入り機能の表示有無　ログイン時のみ表示する
+        // ログイン時の処理
+        // お気に入りボタン表示、お気に入りボタンのリスナー処理登録
         if (user != null) {
             favoriteBtn.visibility = View.VISIBLE
-        } else {
-            favoriteBtn.visibility = View.INVISIBLE
-        }
 
-        // こちらも全てログイン時のみに行われる処理。うまく分離するなりマージしなくてはいけないが。。
-        if (user != null) {
-
-            //////// この辺りから　Favorite 関連を処理しているつもり
-            val favDBRef= FirebaseDatabase.getInstance().reference
-            mfavRef = favDBRef.child(favoritesMgmtPath).child(user!!.uid.toString())
+            val userFavsDBRef= FirebaseDatabase.getInstance().reference
+            mfavRef = userFavsDBRef.child(favoritesMgmtPath).child(user!!.uid.toString())
             mfavRef.addChildEventListener(mFavoriteEventListener)
 
             //ボタンタップでオキニ削除or登録.
             favoriteBtn.setOnClickListener {
-                val dbref = FirebaseDatabase.getInstance().reference.child(favoritesMgmtPath)
+                val dbRef = FirebaseDatabase.getInstance().reference.child(favoritesMgmtPath)
                     .child(user!!.uid.toString()).child(mQuestion.questionUid)
                 val mapper = HashMap<String, String>()
                 mapper["genre"] = mQuestion.genre.toString()
                 if (isFavorite) {
-                    dbref.removeValue()
-                    isFavorite = false
-                    favoriteBtn.setTextColor(Color.parseColor("#DCDCDC"))
+                    dbRef.removeValue()
+                    undoFavoriteAction()
                     Snackbar.make(
                         findViewById(android.R.id.content),
                         "お気に入りから削除されました",
                         Snackbar.LENGTH_SHORT
                     ).show()
                 } else {
-                    dbref.setValue(mapper)
-                    isFavorite = true
-                    favoriteBtn.setTextColor(Color.parseColor("#FFD700"))
+                    dbRef.setValue(mapper)
+                    favoriteAction()
                     Snackbar.make(
                         findViewById(android.R.id.content),
                         "お気に入りに追加されました",
@@ -150,7 +143,19 @@ class QuestionDetailActivity : AppCompatActivity() {
                     ).show()
                 }
             }
+        } else {
+            favoriteBtn.visibility = View.INVISIBLE
         }
         ////// 課題関連 END
+    }
+
+    // オキニフラグを反転させて、ボタンの色を変える
+    fun favoriteAction (){
+        isFavorite = true
+        favoriteBtn.setTextColor(Color.parseColor(favoritedBtnColor))
+    }
+    fun undoFavoriteAction (){
+        isFavorite = false
+        favoriteBtn.setTextColor(Color.parseColor(notFavoritedBtnColor))
     }
 }
