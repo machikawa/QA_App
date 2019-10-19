@@ -143,6 +143,7 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
         // R.id.Nav_view は Activity Main.xml に定義したナビゲーションビューですので、これをタッチしたときににゃんにゃんする用。
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this)
+
         // Firebase のインスタンスを生成
         mDatabaseReference = FirebaseDatabase.getInstance().reference
 
@@ -187,7 +188,6 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
-
         // 設定画面に進むためのIntent
         if (id==R.id.action_settings) {
             val intent = Intent(applicationContext, SettingActivity::class.java)
