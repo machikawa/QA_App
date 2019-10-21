@@ -123,8 +123,8 @@ class QuestionDetailActivity : AppCompatActivity() {
             favoriteBtn.setOnClickListener {
                 val dbRef = FirebaseDatabase.getInstance().reference.child(favoritesMgmtPath)
                     .child(user!!.uid.toString()).child(mQuestion.questionUid)
-                val mapper = HashMap<String, String>()
-                mapper["genre"] = mQuestion.genre.toString()
+                val mapper = mQuestion.genre
+
                 if (isFavorite) {
                     dbRef.removeValue()
                     undoFavoriteAction()
@@ -149,7 +149,7 @@ class QuestionDetailActivity : AppCompatActivity() {
         ////// 課題関連 END
     }
 
-    // オキニフラグを反転させて、ボタンの色を変える
+        // オキニフラグを反転させて、ボタンの色を変える
     fun favoriteAction (){
         isFavorite = true
         favoriteBtn.setTextColor(Color.parseColor(favoritedBtnColor))

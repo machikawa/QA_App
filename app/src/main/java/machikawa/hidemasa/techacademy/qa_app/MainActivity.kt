@@ -162,6 +162,7 @@ class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelected
 
     override fun onResume() {
         super.onResume()
+
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         val navigationMenu = navigationView.menu.findItem(R.id.nav_favorite)
 
